@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravatar Profile Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin: 10px 0;
+        }
+        #result {
+            white-space: pre-wrap;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gravatar Profile Fetcher</h1>
+    <p>Enter Gravatar usernames (one per line):</p>
+    <textarea id="usernames" placeholder="username1&#10;username2&#10;username3"></textarea>
+    <button onclick="fetchProfiles()">Fetch Profiles</button>
+    <div id="result"></div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
