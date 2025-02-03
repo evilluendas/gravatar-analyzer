@@ -1,3 +1,5 @@
+# Gravatar Profile Analyzer
+
 A small tool to pull Gravatar profile info from the API, and process it to make it more human-friendly.
 
 ## Instructions
