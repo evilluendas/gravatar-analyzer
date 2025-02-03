@@ -22,15 +22,65 @@
             padding: 15px;
             border-radius: 5px;
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        
+        .dropdown-content button {
+            width: 100%;
+            padding: 12px 16px;
+            text-align: left;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+        
+        .dropdown-content button:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .show {
+            display: block;
+        }
+        .button-row {
+            margin: 10px 0;
+        }
+        .stats {
+            display: inline-block;
+            margin-left: 20px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <h1>Gravatar Profile Fetcher</h1>
     <p>Enter Gravatar usernames (one per line):</p>
     <textarea id="usernames" placeholder="username1&#10;username2&#10;username3"></textarea>
-    <button onclick="fetchProfiles()">Fetch Profiles</button>
+    <div class="button-row">
+        <button onclick="fetchProfiles()">Fetch Profiles</button>
+    </div>
+    <div class="button-row">
+        <div class="dropdown">
+            <button id="downloadBtn" onclick="toggleDropdown()" style="display: none;">Download clean data</button>
+            <div id="downloadDropdown" class="dropdown-content">
+                <button onclick="downloadAsCsv(false)">Download as CSV</button>
+                <button onclick="downloadAsCsv(true)">Download as CSV (with headers)</button>
+            </div>
+        </div>
+        <span id="stats" class="stats"></span>
+    </div>
     <div id="result"></div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=16"></script>
 </body>
 </html> 
