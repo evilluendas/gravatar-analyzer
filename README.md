@@ -9,3 +9,5 @@ A small tool to pull Gravatar profile info from the API, and process it to make 
 4. Open `localhost:8000` in your browser.
 
 You'll see a text area where you can enter a list of usernames, one per line. After clicking `Fetch Profiles` you'll see a JSON with the raw info as provided by the API. You can then process and download the data with the `Download clean data` feature, and import that CSV in any spreadsheet software.
+
+Learn more about the [Gravatar REST API](https://docs.gravatar.com/api/profiles/rest-api/).
