@@ -216,7 +216,7 @@ function downloadAsCsv(includeHeaders = true) {
 
     // Define CSV headers
     const headers = [
-        'Gravatar username',
+        'User ID',
         'Profile URL',
         'Display name',
         "It's public",
@@ -236,14 +236,24 @@ function downloadAsCsv(includeHeaders = true) {
     ];
 
     // Convert profile data to CSV rows
-    const rows = Object.entries(profileData).map(([username, data]) => {
-        const profileUrl = `https://gravatar.com/${username}`;
+    const rows = Object.entries(profileData).map(([input, data]) => {
         const isPublic = !data.error;
         
-        // If not public, return row with empty fields except username and profile URL
+        // Get the actual username from the profile URL if available
+        let username = input;
+        if (isPublic && data.profile_url) {
+            // Extract username from profile URL
+            const match = data.profile_url.match(/gravatar\.com\/([^\/]+)/);
+            if (match) {
+                username = match[1];
+            }
+        }
+        const profileUrl = `https://gravatar.com/${username}`;
+        
+        // If not public, return row with empty fields except input and profile URL
         if (!isPublic) {
             return [
-                username,
+                input,
                 profileUrl,
                 '', // Display Name
                 'No',
@@ -278,11 +288,11 @@ function downloadAsCsv(includeHeaders = true) {
         }
 
         return [
-            username,
+            input,
             profileUrl,
             data.display_name || '',
             'Yes',
-            data.display_name && data.display_name !== username ? 'Yes' : 'No',
+            data.display_name && data.display_name !== input ? 'Yes' : 'No',
             aboutStatus,
             data.verified_accounts && data.verified_accounts.length > 0 ? 'Yes' : 'No',
             data.links && data.links.length > 0 ? 'Yes' : 'No',
