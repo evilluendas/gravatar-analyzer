@@ -41,12 +41,15 @@ document.querySelector('.collapsible').addEventListener('click', function() {
 });
 
 function calculateProfileStats(profileData) {
-    const profiles = Object.values(profileData).filter(profile => !profile.error);
+    const profiles = Object.entries(profileData)
+        .filter(([_, profile]) => !profile.error)
+        .map(([input, profile]) => ({ ...profile, input }));
+    
     const total = profiles.length;
     if (total === 0) return null;
 
     const stats = {
-        customName: profiles.filter(p => p.display_name && p.display_name !== p.username).length,
+        customName: profiles.filter(p => p.display_name && p.display_name !== p.input).length,
         about: profiles.filter(p => p.description || p.location || p.job_title || p.company || p.pronunciation || p.pronouns).length,
         verifiedAccounts: profiles.filter(p => p.verified_accounts && p.verified_accounts.length > 0).length,
         links: profiles.filter(p => p.links && p.links.length > 0).length,
@@ -150,8 +153,8 @@ async function fetchProfiles() {
         let statsHtml = `${fetchStats.profilesChecked} profiles checked • ${fetchStats.apiCalls} API calls • ${processingTime.toFixed(1)} seconds<br>` +
                        `${publicProfiles} public profiles found (${percentage}%)`;
 
-        // Add detailed stats if more than 1 public profile found
-        if (publicProfiles > 1) {
+        // Add detailed stats if there's at least one public profile
+        if (publicProfiles > 0) {
             const { stats, total } = calculateProfileStats(profileData);
             statsHtml += '<br><br>Of these profiles:' +
                 `<br>• Custom name: ${formatStatsDetail(stats.customName, total)}` +
