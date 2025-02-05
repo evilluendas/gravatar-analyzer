@@ -60,27 +60,67 @@
             margin-left: 20px;
             color: #666;
         }
+        .collapsible {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            margin-top: 10px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .active, .collapsible:hover {
+            background-color: #e8e8e8;
+        }
+
+        .content {
+            display: none;
+            overflow: hidden;
+            background-color: #f5f5f5;
+            border-radius: 0 0 5px 5px;
+            margin-top: 0;
+        }
+
+        #result {
+            margin-top: 0;
+            border-radius: 0 0 5px 5px;
+        }
+        .summary-row {
+            margin: 10px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <h1>Gravatar Profile Fetcher</h1>
-    <p>Enter Gravatar usernames (one per line):</p>
-    <textarea id="usernames" placeholder="username1&#10;username2&#10;username3"></textarea>
+    <p>Enter Gravatar usernames or emails (one per line):</p>
+    <textarea id="usernames" placeholder="username1&#10;user@example.com&#10;username2"></textarea>
     <div class="button-row">
         <button onclick="fetchProfiles()">Fetch Profiles</button>
     </div>
     <div class="button-row">
         <div class="dropdown">
-            <button id="downloadBtn" onclick="toggleDropdown()" style="display: none;">Download clean data</button>
+            <button id="downloadBtn" onclick="toggleDropdown()" style="display: none;">Download Clean Data</button>
             <div id="downloadDropdown" class="dropdown-content">
                 <button onclick="downloadAsCsv(false)">Download as CSV</button>
                 <button onclick="downloadAsCsv(true)">Download as CSV (with headers)</button>
             </div>
         </div>
-        <span id="stats" class="stats"></span>
     </div>
-    <div id="result"></div>
+    <div id="stats" class="summary-row" style="display: none;"></div>
+    <button class="collapsible" style="display: none;">See full JSON</button>
+    <div class="content">
+        <div id="result"></div>
+    </div>
 
-    <script src="script.js?v=16"></script>
+    <script src="script.js?v=20"></script>
 </body>
 </html> 

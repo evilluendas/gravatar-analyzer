@@ -22,37 +22,60 @@ window.onclick = function(event) {
     }
 }
 
-async function fetchProfiles() {
-    const usernames = document.getElementById('usernames').value
-        .split('\n')
-        .map(username => username.trim())
-        .filter(username => username.length > 0);
+function isEmail(input) {
+    // Basic email validation regex
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
+}
 
-    if (usernames.length === 0) {
-        alert('Please enter at least one username');
+// Add collapsible functionality
+document.querySelector('.collapsible').addEventListener('click', function() {
+    this.classList.toggle('active');
+    const content = this.nextElementSibling;
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
+        this.textContent = 'See full JSON';
+    } else {
+        content.style.display = 'block';
+        this.textContent = 'Hide JSON';
+    }
+});
+
+async function fetchProfiles() {
+    const inputs = document.getElementById('usernames').value
+        .split('\n')
+        .map(input => input.trim())
+        .filter(input => input.length > 0);
+
+    if (inputs.length === 0) {
+        alert('Please enter at least one username or email');
         return;
     }
 
     const resultDiv = document.getElementById('result');
     const statsDiv = document.getElementById('stats');
-    resultDiv.textContent = `Fetching profiles... (0 of ${usernames.length})`;
+    const collapsibleBtn = document.querySelector('.collapsible');
+    const contentDiv = collapsibleBtn.nextElementSibling;
+    
+    resultDiv.textContent = `Fetching profiles... (0 of ${inputs.length})`;
     document.getElementById('downloadBtn').style.display = 'none';
-    statsDiv.textContent = '';
+    collapsibleBtn.style.display = 'none';
+    contentDiv.style.display = 'none';
+    statsDiv.style.display = 'none';
 
     // Reset and start stats
     fetchStats = {
         startTime: new Date(),
         endTime: null,
-        profilesChecked: usernames.length,
-        apiCalls: usernames.length
+        profilesChecked: inputs.length,
+        apiCalls: inputs.length
     };
 
     try {
-        // Split usernames into smaller chunks to show progress
+        // Split inputs into smaller chunks to show progress
         const CHUNK_SIZE = 5;
         const chunks = [];
-        for (let i = 0; i < usernames.length; i += CHUNK_SIZE) {
-            chunks.push(usernames.slice(i, i + CHUNK_SIZE));
+        for (let i = 0; i < inputs.length; i += CHUNK_SIZE) {
+            chunks.push(inputs.slice(i, i + CHUNK_SIZE));
         }
 
         let results = {};
@@ -60,19 +83,25 @@ async function fetchProfiles() {
 
         // Process chunks sequentially
         for (const chunk of chunks) {
+            // Prepare the data with type information
+            const processedInputs = chunk.map(input => ({
+                value: input,
+                type: isEmail(input) ? 'email' : 'username'
+            }));
+
             const response = await fetch('fetch_profiles.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ usernames: chunk })
+                body: JSON.stringify({ inputs: processedInputs })
             });
 
             const chunkData = await response.json();
             results = { ...results, ...chunkData };
             
             processed += chunk.length;
-            resultDiv.textContent = `Fetching profiles... (${processed} of ${usernames.length})`;
+            resultDiv.textContent = `Fetching profiles... (${processed} of ${inputs.length})`;
         }
 
         profileData = results;
@@ -81,13 +110,23 @@ async function fetchProfiles() {
         // Update UI
         resultDiv.textContent = JSON.stringify(profileData, null, 2);
         document.getElementById('downloadBtn').style.display = 'inline-block';
+        collapsibleBtn.style.display = 'block';
         
-        // Calculate and display stats
+        // Calculate stats
         const processingTime = (fetchStats.endTime - fetchStats.startTime) / 1000;
-        statsDiv.textContent = `${fetchStats.profilesChecked} profiles checked • ${fetchStats.apiCalls} API calls • ${processingTime.toFixed(1)} seconds`;
+        const publicProfiles = Object.values(profileData).filter(profile => !profile.error).length;
+        const percentage = ((publicProfiles / fetchStats.profilesChecked) * 100).toFixed(1);
+        
+        // Display stats in two lines
+        statsDiv.style.display = 'block';
+        statsDiv.innerHTML = 
+            `${fetchStats.profilesChecked} profiles checked • ${fetchStats.apiCalls} API calls • ${processingTime.toFixed(1)} seconds<br>` +
+            `${publicProfiles} public profiles found (${percentage}%)`;
     } catch (error) {
         resultDiv.textContent = 'Error fetching profiles: ' + error.message;
-        statsDiv.textContent = '';
+        statsDiv.style.display = 'none';
+        collapsibleBtn.style.display = 'none';
+        contentDiv.style.display = 'none';
     }
 }
 

@@ -8,7 +8,7 @@ $config = file_exists(__DIR__ . '/config.php')
 
 // Read the POST data
 $input = json_decode(file_get_contents('php://input'), true);
-$usernames = $input['usernames'] ?? [];
+$inputs = $input['inputs'] ?? [];
 
 // Initialize results array
 $results = [];
@@ -16,10 +16,16 @@ $results = [];
 // API base URL
 $baseUrl = 'https://api.gravatar.com/v3/profiles/';
 
-foreach ($usernames as $username) {
+foreach ($inputs as $input) {
+    $value = $input['value'];
+    $type = $input['type'];
+    
     try {
+        // If it's an email, hash it
+        $identifier = $type === 'email' ? hash('sha256', strtolower(trim($value))) : $value;
+        
         // Make request to Gravatar API
-        $ch = curl_init($baseUrl . urlencode($username));
+        $ch = curl_init($baseUrl . urlencode($identifier));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         
@@ -35,15 +41,15 @@ foreach ($usernames as $username) {
         curl_close($ch);
 
         if ($httpCode === 200) {
-            $results[$username] = json_decode($response, true);
+            $results[$value] = json_decode($response, true);
         } else {
-            $results[$username] = [
+            $results[$value] = [
                 'error' => 'Profile not found or API error',
                 'status' => $httpCode
             ];
         }
     } catch (Exception $e) {
-        $results[$username] = [
+        $results[$value] = [
             'error' => $e->getMessage()
         ];
     }
