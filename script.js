@@ -83,11 +83,13 @@ async function fetchProfiles() {
     const collapsibleBtn = document.querySelector('.collapsible');
     const contentDiv = collapsibleBtn.nextElementSibling;
     
-    resultDiv.textContent = `Fetching profiles... (0 of ${inputs.length})`;
+    // Show fetching message in stats div
+    statsDiv.style.display = 'block';
+    statsDiv.textContent = `Fetching profiles... (0 of ${inputs.length})`;
+    
     document.getElementById('downloadBtn').style.display = 'none';
     collapsibleBtn.style.display = 'none';
     contentDiv.style.display = 'none';
-    statsDiv.style.display = 'none';
 
     // Reset and start stats
     fetchStats = {
@@ -128,7 +130,7 @@ async function fetchProfiles() {
             results = { ...results, ...chunkData };
             
             processed += chunk.length;
-            resultDiv.textContent = `Fetching profiles... (${processed} of ${inputs.length})`;
+            statsDiv.textContent = `Fetching profiles... (${processed} of ${inputs.length})`;
         }
 
         profileData = results;
@@ -145,7 +147,6 @@ async function fetchProfiles() {
         const percentage = ((publicProfiles / fetchStats.profilesChecked) * 100).toFixed(1);
         
         // Display stats
-        statsDiv.style.display = 'block';
         let statsHtml = `${fetchStats.profilesChecked} profiles checked • ${fetchStats.apiCalls} API calls • ${processingTime.toFixed(1)} seconds<br>` +
                        `${publicProfiles} public profiles found (${percentage}%)`;
 
