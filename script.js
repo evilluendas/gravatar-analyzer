@@ -40,6 +40,33 @@ document.querySelector('.collapsible').addEventListener('click', function() {
     }
 });
 
+function calculateProfileStats(profileData) {
+    const profiles = Object.values(profileData).filter(profile => !profile.error);
+    const total = profiles.length;
+    if (total === 0) return null;
+
+    const stats = {
+        customName: profiles.filter(p => p.display_name && p.display_name !== p.username).length,
+        about: profiles.filter(p => p.description || p.location || p.job_title || p.company || p.pronunciation || p.pronouns).length,
+        verifiedAccounts: profiles.filter(p => p.verified_accounts && p.verified_accounts.length > 0).length,
+        links: profiles.filter(p => p.links && p.links.length > 0).length,
+        customDesign: profiles.filter(p => p.background_color).length,
+        headerImage: profiles.filter(p => p.header_image).length,
+        photos: profiles.filter(p => p.gallery && p.gallery.length > 0).length,
+        interests: profiles.filter(p => hasNonEmptyValues(p.interests)).length,
+        contactInfo: profiles.filter(p => hasNonEmptyValues(p.contact_info)).length,
+        sendMoney: profiles.filter(p => hasNonEmptyValues(p.payments)).length,
+        customDomain: profiles.filter(p => p.profile_url && !p.profile_url.includes('gravatar.com')).length
+    };
+
+    return { stats, total };
+}
+
+function formatStatsDetail(count, total) {
+    const percentage = ((count / total) * 100).toFixed(1);
+    return `${count} (${percentage}%)`;
+}
+
 async function fetchProfiles() {
     const inputs = document.getElementById('usernames').value
         .split('\n')
@@ -117,11 +144,29 @@ async function fetchProfiles() {
         const publicProfiles = Object.values(profileData).filter(profile => !profile.error).length;
         const percentage = ((publicProfiles / fetchStats.profilesChecked) * 100).toFixed(1);
         
-        // Display stats in two lines
+        // Display stats
         statsDiv.style.display = 'block';
-        statsDiv.innerHTML = 
-            `${fetchStats.profilesChecked} profiles checked • ${fetchStats.apiCalls} API calls • ${processingTime.toFixed(1)} seconds<br>` +
-            `${publicProfiles} public profiles found (${percentage}%)`;
+        let statsHtml = `${fetchStats.profilesChecked} profiles checked • ${fetchStats.apiCalls} API calls • ${processingTime.toFixed(1)} seconds<br>` +
+                       `${publicProfiles} public profiles found (${percentage}%)`;
+
+        // Add detailed stats if more than 1 public profile found
+        if (publicProfiles > 1) {
+            const { stats, total } = calculateProfileStats(profileData);
+            statsHtml += '<br><br>Of these profiles:' +
+                `<br>• Custom name: ${formatStatsDetail(stats.customName, total)}` +
+                `<br>• About section: ${formatStatsDetail(stats.about, total)}` +
+                `<br>• Verified accounts: ${formatStatsDetail(stats.verifiedAccounts, total)}` +
+                `<br>• Links: ${formatStatsDetail(stats.links, total)}` +
+                (stats.customDesign ? `<br>• Custom design: ${formatStatsDetail(stats.customDesign, total)}` : '') +
+                (stats.headerImage ? `<br>• Header image: ${formatStatsDetail(stats.headerImage, total)}` : '') +
+                `<br>• Photos: ${formatStatsDetail(stats.photos, total)}` +
+                `<br>• Interests: ${formatStatsDetail(stats.interests, total)}` +
+                `<br>• Contact info: ${formatStatsDetail(stats.contactInfo, total)}` +
+                `<br>• Send money: ${formatStatsDetail(stats.sendMoney, total)}` +
+                `<br>• Custom domain: ${formatStatsDetail(stats.customDomain, total)}`;
+        }
+
+        statsDiv.innerHTML = statsHtml;
     } catch (error) {
         resultDiv.textContent = 'Error fetching profiles: ' + error.message;
         statsDiv.style.display = 'none';
